@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Propagation Demo</title>
+  <style>
+    .box {
+      padding: 30px;
+      margin: 10px;
+      border: 2px solid black;
+    }
+    #div1 { background-color: #fdd; }
+    #div2 { background-color: #dfd; }
+    #div3 { background-color: #ddf; }
+  </style>
+</head>
+<body>
+  <div id="div1" class="box">
+    Div 1
+    <button>Button 1</button>
+    <div id="div2" class="box">
+      Div 2
+      <button>Button 2</button>
+      <div id="div3" class="box">
+        Div 3
+        <button>Button 3</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const div1 = document.getElementById('div1');
+    const div2 = document.getElementById('div2');
+    const div3 = document.getElementById('div3');
+
+    // Common function to attach event listeners
+    function attachListeners(element, name) {
+      // Capturing phase
+      element.addEventListener('click', (e) => {
+        alert(name + ' (Capturing)');
+      }, true); // `true` means capturing phase
+
+      // Bubbling phase
+      element.addEventListener('click', (e) => {
+        alert(name + ' (Bubbling)');
+      });
+    }
+
+    attachListeners(div1, 'Div 1');
+    attachListeners(div2, 'Div 2');
+    attachListeners(div3, 'Div 3');
+
+    // Button event listeners
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach((btn, index) => {
+      btn.addEventListener('click', (e) => {
+        alert(`Button ${index + 1}`);
+        if (index === 2) {
+          e.stopPropagation(); // Stop event for Button 3
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Task Manager</title>
+  <style>
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+    button {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Task Manager</h2>
+
+  <input type="text" id="taskInput" placeholder="Enter task">
+  <button id="addTask">Add Task</button>
+  <button id="sortTasks">Sort Alphabetically</button>
+
+  <div style="margin-top: 10px;">
+    <button data-filter="all">All Tasks</button>
+    <button data-filter="completed">Completed Tasks</button>
+    <button data-filter="incomplete">Incomplete Tasks</button>
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <p id="counters">Total: 0 | Completed: 0 | Incomplete: 0</p>
+
+  <script>
+    let tasks = [];
+    let currentFilter = 'all';
+
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+    const counters = document.getElementById('counters');
+
+    // Add Task
+    document.getElementById('addTask').addEventListener('click', () => {
+      const text = taskInput.value.trim();
+      if (text === '') return;
+      tasks.push({ text, completed: false });
+      taskInput.value = '';
+      renderTasks();
+    });
+
+    // Sort Tasks
+    document.getElementById('sortTasks').addEventListener('click', () => {
+      tasks.sort((a, b) => a.text.localeCompare(b.text));
+      renderTasks();
+    });
+
+    // Event Delegation for toggle & delete
+    taskList.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      if (!li) return;
+      const index = li.dataset.index;
+
+      if (e.target.classList.contains('delete')) {
+        tasks.splice(index, 1);
+      } else if (e.target.classList.contains('toggle')) {
+        tasks[index].completed = !tasks[index].completed;
+      }
+      renderTasks();
+    });
+
+    // Filter Buttons
+    document.querySelectorAll('button[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter;
+        renderTasks();
+      });
+    });
+
+    // Render Function
+    function renderTasks() {
+      let filteredTasks = tasks;
+
+      if (currentFilter === 'completed') {
+        filteredTasks = tasks.filter(task => task.completed);
+      } else if (currentFilter === 'incomplete') {
+        filteredTasks = tasks.filter(task => !task.completed);
+      }
+
+      taskList.innerHTML = '';
+
+      filteredTasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.dataset.index = tasks.indexOf(task);
+        li.innerHTML = `
+          <span class="${task.completed ? 'completed' : ''}">
+            <input type="checkbox" class="toggle" ${task.completed ? 'checked' : ''}>
+            ${task.text}
+          </span>
+          <button class="delete">Delete</button>
+        `;
+        taskList.appendChild(li);
+      });
+
+      // Update Counters
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      const incomplete = total - completed;
+      counters.textContent = `Total: ${total} | Completed: ${completed} | Incomplete: ${incomplete}`;
+    }
+  </script>
+</body>
+</html>
